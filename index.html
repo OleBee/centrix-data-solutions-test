@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centrix Data Solutions – Grok Test App</title>
+<style>
+  :root {
+    --primary: #003366;
+    --accent: #0066cc;
+    --bg: #f4f6f9;
+    --card: #fff;
+    --border: #dde1e6;
+    --success: #0d7a4f;
+    --danger: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 14px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 { margin: 0; font-size: 20px; }
+  #userInfo { font-size: 14px; opacity: .9; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .container {
+    max-width: 820px;
+    margin: 36px auto;
+    background: var(--card);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    padding: 32px 40px;
+  }
+  h2 { margin: 0 0 24px; color: var(--primary); }
+  .form-group { margin-bottom: 18px; }
+  label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+  input[type="text"], input[type="password"], input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 15px;
+  }
+  input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,102,204,.15); }
+  .checkbox-row { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 11px 22px;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-top: 8px;
+  }
+  .btn:hover { background: #004d99; }
+  .btn-secondary { background: #6c757d; }
+  .btn-success { background: var(--success); }
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 30px; }
+  .menu-btn {
+    background: #f8f9fa;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .menu-btn:hover { border-color: var(--accent); background: #eef5ff; }
+  .menu-btn small { display: block; font-weight: 400; font-size: 13px; color: #666; margin-top: 6px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--primary); color: white; }
+  .status-bar { margin-top: 20px; color: #666; font-size: 13px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white;
+    padding: 28px 32px;
+    border-radius: 10px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  }
+  .modal h3 { margin: 0 0 12px; color: var(--success); }
+  .ref-number {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    background: #f0f4f8;
+    padding: 12px 16px;
+    border-radius: 6px;
+    text-align: center;
+    margin: 16px 0;
+    letter-spacing: 1px;
+  }
+  .error { color: var(--danger); font-size: 14px; margin-top: 8px; }
+  .demo-hint { margin-top: 28px; padding: 12px; background: #f8f9fa; border-radius: 6px; font-size: 13px; color: #666; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Centrix Data Solutions</h1>
+  <div id="userInfo"></div>
+</header>
+
+<div id="loginScreen" class="screen active">
+  <div class="container">
+    <h2>Login</h2>
+    <div class="form-group">
+      <label for="staff">Staff Number</label>
+      <input type="text" id="staff" autocomplete="off" placeholder="BP">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="password">
+    </div>
+    <div id="loginError" class="error"></div>
+    <div>
+      <button class="btn" id="loginBtn" onclick="login()">Login</button>
+    </div>
+    <div class="demo-hint">
+      <strong>Demo:</strong> Staff Number <code>BP</code> · Password <code>password</code>
+    </div>
+  </div>
+</div>
+
+<div id="mainScreen" class="screen">
+  <div class="container">
+    <h2>Main Menu</h2>
+    <div class="menu-grid">
+      <div class="menu-btn" onclick="showScreen('newOrderScreen')">
+        New Order
+        <small>Create a new customer order</small>
+      </div>
+      <div class="menu-btn" onclick="showScreen('ordersScreen'); renderOrders();">
+        View Orders
+        <small>Browse existing orders</small>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+    <div class="status-bar" id="orderCount"></div>
+  </div>
+</div>
+
+<div id="newOrderScreen" class="screen">
+  <div class="container">
+    <h2>New Order</h2>
+    <div class="form-group">
+      <label for="productCode">Product Code</label>
+      <input type="text" id="productCode" placeholder="PROD-001">
+    </div>
+    <div class="form-group">
+      <label for="unitPrice">Unit Price</label>
+      <input type="text" id="unitPrice" placeholder="29.99">
+    </div>
+    <div class="form-group">
+      <label for="quantity">Quantity</label>
+      <input type="text" id="quantity" placeholder="5">
+    </div>
+    <div class="form-group">
+      <label for="customer">Customer Account</label>
+      <input type="text" id="customer" placeholder="CUST-1001">
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="priority">
+      <label for="priority" style="margin:0;">Priority Order</label>
+    </div>
+    <div class="form-group">
+      <label for="orderDate">Order Date</label>
+      <input type="date" id="orderDate">
+    </div>
+    <div id="orderError" class="error"></div>
+    <div>
+      <button class="btn btn-success" id="submitBtn" onclick="submitOrder()">Submit Order</button>
+      <button class="btn btn-secondary" onclick="showScreen('mainScreen')">Back</button>
+    </div>
+  </div>
+</div>
+
+<div id="ordersScreen" class="screen">
+  <div class="container">
+    <h2>Order List</h2>
+    <table id="ordersTable">
+      <thead>
+        <tr>
+          <th>Reference</th><th>Customer</th><th>Product</th><th>Qty</th><th>Price</th><th>Date</th><th>Priority</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div>
+      <button class="btn btn-secondary" onclick="showScreen('mainScreen')">Back to Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal">
+    <h3>Order Submitted</h3>
+    <p>The order has been successfully registered.</p>
+    <div class="ref-number" id="refDisplay"></div>
+    <button class="btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "centrixOrders";
+let orders = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let currentUser = null;
+
+document.getElementById("orderDate").valueAsDate = new Date();
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === "mainScreen") updateStatus();
+}
+
+function updateStatus() {
+  document.getElementById("orderCount").textContent =
+    `${orders.length} order${orders.length === 1 ? "" : "s"} in system`;
+  document.getElementById("userInfo").textContent = currentUser ? `Logged in as: ${currentUser}` : "";
+}
+
+function login() {
+  const staff = document.getElementById("staff").value.trim().toUpperCase();
+  const pass = document.getElementById("password").value;
+  const err = document.getElementById("loginError");
+  if (staff === "BP" && pass === "password") {
+    currentUser = staff;
+    err.textContent = "";
+    showScreen("mainScreen");
+  } else {
+    err.textContent = "Invalid Staff Number or Password. Try BP / password";
+    document.getElementById("password").value = "";
+    document.getElementById("password").focus();
+  }
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById("staff").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("loginError").textContent = "";
+  showScreen("loginScreen");
+}
+
+function submitOrder() {
+  const product = document.getElementById("productCode").value.trim();
+  const price = document.getElementById("unitPrice").value.trim();
+  const qty = document.getElementById("quantity").value.trim();
+  const customer = document.getElementById("customer").value.trim();
+  const date = document.getElementById("orderDate").value;
+  const priority = document.getElementById("priority").checked;
+  const err = document.getElementById("orderError");
+
+  if (!product || !price || !qty || !customer || !date) {
+    err.textContent = "Please fill in all required fields.";
+    return;
+  }
+  if (isNaN(parseFloat(price)) || isNaN(parseInt(qty))) {
+    err.textContent = "Unit Price must be a number and Quantity must be an integer.";
+    return;
+  }
+  err.textContent = "";
+
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const ref = `ORD-${today}-${String(orders.length + 1).padStart(4, "0")}`;
+
+  orders.push({
+    reference: ref,
+    product_code: product,
+    unit_price: price,
+    quantity: qty,
+    customer_account: customer,
+    priority,
+    order_date: date,
+    created: new Date().toISOString()
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+
+  document.getElementById("refDisplay").textContent = ref;
+  document.getElementById("confirmModal").classList.add("show");
+
+  ["productCode", "unitPrice", "quantity", "customer"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("priority").checked = false;
+  document.getElementById("orderDate").valueAsDate = new Date();
+}
+
+function closeModal() {
+  document.getElementById("confirmModal").classList.remove("show");
+  showScreen("mainScreen");
+}
+
+function renderOrders() {
+  const tbody = document.querySelector("#ordersTable tbody");
+  tbody.innerHTML = "";
+  if (orders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#888;padding:30px;">No orders yet</td></tr>`;
+    return;
+  }
+  [...orders].reverse().forEach(o => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${o.reference}</td>
+      <td>${o.customer_account}</td>
+      <td>${o.product_code}</td>
+      <td>${o.quantity}</td>
+      <td>${o.unit_price}</td>
+      <td>${o.order_date}</td>
+      <td>${o.priority ? "Yes" : "No"}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("password").addEventListener("keypress", e => { if (e.key === "Enter") login(); });
+document.getElementById("staff").addEventListener("keypress", e => { if (e.key === "Enter") document.getElementById("password").focus(); });
+</script>
+</body>
+</html>
